@@ -72,7 +72,7 @@ const Navbar = () => {
             className='text-2xl font-bold mb-8'
             onClick={toggleMenu}
           >
-            Vishnu
+            CMS
           </Link>
           
           

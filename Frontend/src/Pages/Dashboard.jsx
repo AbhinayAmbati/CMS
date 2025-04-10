@@ -47,7 +47,7 @@ const Dashboard = () => {
 
   return (
     <div className="container min-h-[calc(100vh-100px)] mx-auto px-4 pt-8">
-      {/* Edit Modal */}
+     
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80  flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -110,7 +110,7 @@ const Dashboard = () => {
                   {stat.icon}
                 </div>
                 <h2 className="text-3xl font-bold mb-1">{stat.value}</h2>
-                <p className="text-sm text-gray-500">{stat.change}</p>
+               
               </div>
             ))}
           </div>
