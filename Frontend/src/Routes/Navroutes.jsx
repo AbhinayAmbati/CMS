@@ -4,6 +4,8 @@ import Home from '../Pages/Home'
 import Dashboard from '../Pages/Dashboard'
 import Login from '../Pages/Login'
 import Signup from '../Pages/Signup'
+import Blog from '../Pages/Blog'
+import BlogPost from '../Pages/BlogPost'
 
 const Navroutes = () => {
   return (
@@ -12,6 +14,8 @@ const Navroutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogPost />} />
     </Routes>
   )
 }
