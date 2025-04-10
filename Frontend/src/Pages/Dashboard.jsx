@@ -3,34 +3,34 @@ import { FaFolder, FaEye, FaNewspaper, FaCode, FaMobile, FaRegEdit, FaCommentAlt
 import { MdBookmark } from 'react-icons/md';
 
 const Dashboard = () => {
-  // User data
+  
   const userData = {
     name: "Vishnu",
     title: "Full Stack Developer",
-    profileImage: "https://imgs.search.brave.com/Wy9yeON3-cT0jG1XYVChtQhRHqReCB8MUuscX8tdfx0/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89", // Using a placeholder avatar service
+    profileImage: "https://imgs.search.brave.com/Wy9yeON3-cT0jG1XYVChtQhRHqReCB8MUuscX8tdfx0/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89", 
   };
 
-  // Stats data
+
   const statsData = [
     { id: 1, title: "Total Projects", value: "24", change: "+3 this month", icon: <FaFolder className="text-gray-500" /> },
     { id: 2, title: "Blog Posts", value: "156", change: "+12 this month", icon: <FaNewspaper className="text-gray-500" /> },
     { id: 3, title: "Profile Views", value: "2.4k", change: "+18% this month", icon: <FaEye className="text-gray-500" /> },
   ];
 
-  // Navigation links
+  
   const navLinks = [
     { id: 1, title: "Profile", icon: <FaUser size={20} /> },
     { id: 2, title: "Messages", icon: <FaCommentAlt size={20} /> },
     { id: 3, title: "Saved", icon: <MdBookmark size={20} /> },
   ];
 
-  // Recent projects data
+ 
   const recentProjects = [
     { id: 1, title: "E-commerce Platform", updatedDays: 2, icon: <FaCode className="text-gray-500" /> },
     { id: 2, title: "Mobile App UI", updatedDays: 5, icon: <FaMobile className="text-gray-500" /> },
   ];
 
-  // Recent posts data
+ 
   const recentPosts = [
     { id: 1, title: "Getting Started with React Hooks", date: "Jan 15, 2025", views: "1.2k", comments: 8 },
     { id: 2, title: "Best Practices for API Design", date: "Jan 10, 2025", views: "956", comments: 12 },
@@ -39,7 +39,7 @@ const Dashboard = () => {
   return (
     <div className="container min-h-[calc(100vh-100px)] mx-auto px-4 pt-8 ">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* User Profile Card */}
+        
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex flex-col items-center">
             <div className="w-20 h-20 rounded-full overflow-hidden mb-4">
@@ -59,9 +59,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Main Content */}
+       
         <div className="md:col-span-3 space-y-6">
-          {/* Stats Cards */}
+         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {statsData.map((stat) => (
               <div key={stat.id} className="bg-white p-4 rounded-lg shadow-sm flex flex-col">
@@ -75,7 +75,7 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Recent Projects */}
+          
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Recent Projects</h3>
@@ -102,7 +102,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Recent Posts */}
+          
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Recent Posts</h3>
@@ -130,7 +130,7 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
-    
+
   );
 };
 

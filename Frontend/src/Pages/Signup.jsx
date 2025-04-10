@@ -9,10 +9,7 @@ const Signup = () => {
   return (
     <div className="min-h-[calc(100vh-100px)] bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="bg-white p-4 sm:p-8 rounded-lg shadow-sm w-full max-w-md">
-        {/* Logo and Header */}
-        
-
-        {/* Tabs */}
+      
         <div className="flex border-b mb-6">
           <Link to="/login" className="w-1/2 pb-2 text-center text-gray-500 hover:text-gray-700">
             Sign In
@@ -22,9 +19,9 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Signup Form */}
+       
         <form className="space-y-4">
-          {/* Name Field */}
+      
           <div>
             <label htmlFor="name" className="block text-gray-700 mb-1 text-sm sm:text-base">Full Name</label>
             <div className="relative">
@@ -40,7 +37,7 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Email Field */}
+        
           <div>
             <label htmlFor="email" className="block text-gray-700 mb-1 text-sm sm:text-base">Email</label>
             <div className="relative">
@@ -56,7 +53,6 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Password Field */}
           <div>
             <label htmlFor="password" className="block text-gray-700 mb-1 text-sm sm:text-base">Password</label>
             <div className="relative">
@@ -72,7 +68,7 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Confirm Password Field */}
+          
           <div>
             <label htmlFor="confirmPassword" className="block text-gray-700 mb-1 text-sm sm:text-base">Confirm Password</label>
             <div className="relative">
@@ -88,7 +84,7 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Terms and Conditions */}
+          
           <div className="flex items-start sm:items-center">
             <input
               type="checkbox"
@@ -102,7 +98,7 @@ const Signup = () => {
             </label>
           </div>
 
-          {/* Sign Up Button */}
+         
           <button
             type="submit"
             className="w-full bg-gray-900 text-white rounded-md py-2 px-4 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm sm:text-base"
@@ -111,7 +107,7 @@ const Signup = () => {
           </button>
         </form>
 
-        {/* Divider */}
+        
         <div className="mt-6 relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
@@ -123,7 +119,7 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Social Login */}
+        
         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
           <button
             type="button"
@@ -145,7 +141,7 @@ const Signup = () => {
           </button>
         </div>
 
-        {/* Login Link */}
+        
         <div className="mt-6 text-center text-sm">
           <p className="text-gray-600">
             Already have an account?{' '}

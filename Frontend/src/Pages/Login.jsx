@@ -9,10 +9,10 @@ const Login = () => {
   return (
     <div className="min-h-[calc(100vh-100px)] overflow-hidden bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="bg-white p-4 sm:p-8 rounded-lg shadow-sm w-full max-w-md">
-        {/* Logo and Header */}
+        
         
 
-        {/* Tabs */}
+        
         <div className="flex border-b mb-6">
           <div className="w-1/2 pb-2 text-center border-b-2 border-gray-800 font-medium">
             Sign In
@@ -22,9 +22,9 @@ const Login = () => {
           </Link>
         </div>
 
-        {/* Login Form */}
+       
         <form className="space-y-4">
-          {/* Email Field */}
+         
           <div>
             <label htmlFor="email" className="block text-gray-700 mb-1 text-sm sm:text-base">Email</label>
             <div className="relative">
@@ -40,7 +40,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Password Field */}
+          
           <div>
             <label htmlFor="password" className="block text-gray-700 mb-1 text-sm sm:text-base">Password</label>
             <div className="relative">
@@ -56,7 +56,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Remember Me and Forgot Password */}
+          
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div className="flex items-center">
               <input
@@ -77,7 +77,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Sign In Button */}
+          
           <button
             type="submit"
             className="w-full bg-gray-900 text-white rounded-md py-2 px-4 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm sm:text-base"
@@ -86,7 +86,7 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Divider */}
+       
         <div className="mt-6 relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
@@ -98,7 +98,7 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Social Login */}
+        
         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
           <button
             type="button"
@@ -120,7 +120,7 @@ const Login = () => {
           </button>
         </div>
 
-        {/* Sign Up Link */}
+        
         <div className="mt-6 text-center text-sm">
           <p className="text-gray-600">
             Don't have an account?{' '}
