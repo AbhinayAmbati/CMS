@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const Blog = () => {
-  // Dummy data for blog posts with images
+  
   const blogPosts = [
     {
       id: 1,
