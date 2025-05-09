@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import { FaFolder, FaEye, FaNewspaper, FaCode, FaMobile, FaRegEdit, FaCommentAlt, FaUser, FaTimes } from 'react-icons/fa';
+import { FaFolder, FaEye, FaNewspaper, FaCode, FaMobile, FaRegEdit, FaCommentAlt, FaUser, FaTimes, FaTrash } from 'react-icons/fa';
 import { MdBookmark } from 'react-icons/md';
 import { Link } from 'react-router-dom';
+import BlogEditor from '../Components/BlogEditor';
 
 const Dashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [showBlogEditor, setShowBlogEditor] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [recentPosts, setRecentPosts] = useState([
+    { id: 1, title: "Getting Started with React ", date: "Jan 15, 2025", views: "1.2k", comments: 8 },
+    { id: 2, title: "Advanced React Patterns", date: "Jan 10, 2025", views: "956", comments: 12 },
+    { id: 3, title: "State Management in React", date: "Jan 10, 2025", views: "956", comments: 12 },
+  ]);
   
   const userData = {
     name: "Vishnu",
@@ -15,23 +23,17 @@ const Dashboard = () => {
 
   const statsData = [
     { id: 1, title: "Total Projects", value: "1", change: "+3 this month", icon: <FaFolder className="text-gray-500" /> },
-    { id: 2, title: "Blog Posts", value: "3", change: "+12 this month", icon: <FaNewspaper className="text-gray-500" /> },
+    { id: 2, title: "Blog Posts", value: recentPosts.length.toString(), change: "+12 this month", icon: <FaNewspaper className="text-gray-500" /> },
     { id: 3, title: "Profile Views", value: "2.4k", change: "+18% this month", icon: <FaEye className="text-gray-500" /> },
   ];
 
   const navLinks = [
     { id: 1, title: "Profile", icon: <FaUser size={20} /> },
-    { id: 3, title: "Saved", icon: <MdBookmark size={20} /> },
+   
   ];
 
   const recentProjects = [
     { id: 1, title: "Vishnu's Blog", updatedDays: 2, icon: <FaCode className="text-gray-500" /> },
-  ];
-
-  const recentPosts = [
-    { id: 1, title: "Getting Started with React ", date: "Jan 15, 2025", views: "1.2k", comments: 8 },
-    { id: 2, title: "Advanced React Patterns", date: "Jan 10, 2025", views: "956", comments: 12 },
-    { id: 3, title: "State Management in React", date: "Jan 10, 2025", views: "956", comments: 12 },
   ];
 
   const handleProjectClick = (project) => {
@@ -40,16 +42,73 @@ const Dashboard = () => {
   };
 
   const handleEditConfirm = () => {
-    
     console.log('Editing project:', selectedProject);
     setShowEditModal(false);
   };
 
+  const handleCreatePost = () => {
+    setSelectedPost(null);
+    setShowBlogEditor(true);
+  };
+
+  const handleEditPost = (post) => {
+    setSelectedPost(post);
+    setShowBlogEditor(true);
+  };
+
+  const handleDeletePost = (postId) => {
+    setRecentPosts(recentPosts.filter(post => post.id !== postId));
+  };
+
+  const handleSavePost = (postData) => {
+    console.log('Saving post:', postData);
+    if (selectedPost) {
+      // Update existing post
+      setRecentPosts(recentPosts.map(post => 
+        post.id === selectedPost.id 
+          ? { ...post, title: postData.title }
+          : post
+      ));
+    } else {
+      // Create new post
+      const newPost = {
+        id: Date.now(),
+        title: postData.title,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        views: "0",
+        comments: 0
+      };
+      setRecentPosts([newPost, ...recentPosts]);
+    }
+    setShowBlogEditor(false);
+  };
+
   return (
     <div className="container min-h-[calc(100vh-100px)] mx-auto px-4 pt-8">
-     
+      {showBlogEditor && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                {selectedPost ? 'Edit Post' : 'Create New Post'}
+              </h3>
+              <button 
+                onClick={() => setShowBlogEditor(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <BlogEditor 
+              initialData={selectedPost}
+              onSave={handleSavePost}
+            />
+          </div>
+        </div>
+      )}
+
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/80  flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">Edit Project</h3>
@@ -110,7 +169,6 @@ const Dashboard = () => {
                   {stat.icon}
                 </div>
                 <h2 className="text-3xl font-bold mb-1">{stat.value}</h2>
-               
               </div>
             ))}
           </div>
@@ -147,23 +205,41 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Recent Posts</h3>
-              <button className="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md text-sm">Create Post</button>
+              <button 
+                onClick={handleCreatePost}
+                className="bg-black text-white px-3 py-1 rounded-md text-sm hover:bg-gray-800 transition-colors"
+              >
+                Create Post
+              </button>
             </div>
             
             <div className="space-y-4">
               {recentPosts.map((post) => (
                 <div key={post.id} className="flex justify-between border-b pb-4">
                   <div>
-                    <Link to={`/blog/${post.id}`}   className="font-medium hover:text-blue-800 transition-colors">{post.title}</Link>
+                    <Link to={`/blog/${post.id}`} className="font-medium hover:text-blue-800 transition-colors">
+                      {post.title}
+                    </Link>
                     <p className="text-sm text-gray-500">Published on {post.date}</p>
                     <div className="flex space-x-4 mt-2 text-sm text-gray-500">
                       <span className="flex items-center"><FaEye className="mr-1" /> {post.views} views</span>
-                      <span className="flex items-center"><FaRegEdit className="mr-1" /> {post.comments} comments</span>
+                      <span className="flex items-center"><FaCommentAlt className="mr-1" /> {post.comments} comments</span>
                     </div>
                   </div>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <FaRegEdit />
-                  </button>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handleEditPost(post)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <FaRegEdit />
+                    </button>
+                    <button 
+                      onClick={() => handleDeletePost(post.id)}
+                      className="text-gray-400 hover:text-red-600"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

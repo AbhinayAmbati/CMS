@@ -10,7 +10,7 @@ const Blog = () => {
       excerpt: 'Learn the basics of React and how to build your first application.',
       author: 'vishnu',
       date: 'April 9, 2024',
-      image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVhY3R8ZW58MHx8MHx8fDA%3D'
+      image: 'https://source.unsplash.com/random/800x600/?react'
     },
     {
       id: 2,
@@ -18,7 +18,7 @@ const Blog = () => {
       excerpt: 'Explore advanced patterns and techniques in React development.',
       author: 'vishnu',
       date: 'April 8, 2024',
-      image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVhY3R8ZW58MHx8MHx8fDA%3D'
+      image: 'https://source.unsplash.com/random/800x600/?programming'
     },
     {
       id: 3,
@@ -26,7 +26,7 @@ const Blog = () => {
       excerpt: 'Understanding different state management solutions in React.',
       author: 'vishnu',
       date: 'April 7, 2024',
-      image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVhY3R8ZW58MHx8MHx8fDA%3D'
+      image: 'https://source.unsplash.com/random/800x600/?code'
     }
   ]
 
