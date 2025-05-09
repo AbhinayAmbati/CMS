@@ -10,7 +10,7 @@ const BlogPost = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-4">Blog post not found</h1>
-        <Link to="/blog" className="text-blue-600 hover:underline">
+        <Link to="/blog" className="text-black hover:underline">
           Back to Blog
         </Link>
       </div>
@@ -53,7 +53,7 @@ const BlogPost = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link to="/blog" className="text-blue-600 hover:underline mb-4 inline-block">
+      <Link to="/blog" className="text-black hover:underline mb-4 inline-block">
         ← Back to Blog
       </Link>
       <article className="max-w-3xl mx-auto">
