@@ -9,6 +9,7 @@ import BlogPost from '../Pages/BlogPost'
 import ProtectedRoute from '../components/ProtectedRoute'
 import AdminDashboard from '../Pages/Admin/AdminDashboard'
 import UserManagement from '../Pages/Admin/UserManagement'
+import ContentManagement from '../Pages/Admin/ContentManagement'
 import ResetPassword from '../Pages/ResetPassword'
 
 const Navroutes = () => {
@@ -37,6 +38,11 @@ const Navroutes = () => {
         <Route path="/admin/users" element={
           <ProtectedRoute requireAdmin={true}>
             <UserManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/content" element={
+          <ProtectedRoute requireAdmin={true}>
+            <ContentManagement />
           </ProtectedRoute>
         } />
     </Routes>
