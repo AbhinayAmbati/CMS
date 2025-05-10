@@ -13,6 +13,8 @@ import Analytics from '../Pages/Admin/Analytics'
 import ResetPassword from '../Pages/ResetPassword'
 import ContentEditor from '../Components/ContentEditor'
 import ContentManagement from '../Pages/Admin/ContentManagement'
+import TermsOfService from '../Pages/TermsOfService'
+import PolicyPage from '../Pages/PolicyPage'
 
 const Navroutes = () => {
   return (
@@ -25,7 +27,8 @@ const Navroutes = () => {
         <Route path="/content" element={<Content />} />
         <Route path="/content/:id" element={<ContentPost />} />
         <Route path='/create-content' element={<ContentEditor />} />
-        
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/privacy-policy" element={<PolicyPage />} />
         {/* Protected routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>

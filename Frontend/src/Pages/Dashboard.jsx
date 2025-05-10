@@ -6,6 +6,7 @@ import ContentEditor from '../Components/ContentEditor';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [showBlogEditor, setShowBlogEditor] = useState(false);
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [showPasswordEditor, setShowPasswordEditor] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
   const [userData, setUserData] = useState({
     username: "User",
@@ -30,6 +32,7 @@ const Dashboard = () => {
   const [otp, setOtp] = useState('');
 
   const {logout} = useAuth();
+  const navigate = useNavigate();
 
   // Fetch user posts and profile info on component mount
   useEffect(() => {
@@ -357,6 +360,31 @@ const Dashboard = () => {
     } catch (err) {
       console.error('Error updating password:', err);
       setError(err.response?.data?.message || 'Failed to update password. Please try again.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('Authentication token not found. Please log in again.');
+        return;
+      }
+      
+      await axios.delete(
+        `${API_URL}/api/user/deleteaccount`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      // Clear cookies and redirect to home page
+      logout();
+      navigate('/');
+      
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      setError('Failed to delete account. Please try again.');
     }
   };
 
@@ -711,6 +739,41 @@ const Dashboard = () => {
         </div>
       )}
 
+      {showDeleteAccountModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-red-600">Delete Account</h3>
+              <button 
+                onClick={() => setShowDeleteAccountModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.
+              </p>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={() => setShowDeleteAccountModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700"
+                >
+                  Delete Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8">
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
@@ -765,6 +828,13 @@ const Dashboard = () => {
                   className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg flex items-center justify-center"
                 >
                   <FaLock className="mr-2" /> Change Password
+                </button>
+
+                <button 
+                  onClick={() => setShowDeleteAccountModal(true)}
+                  className="w-full py-2 px-4 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg flex items-center justify-center"
+                >
+                  <FaTrash className="mr-2" /> Delete Account
                 </button>
               </div>
             </div>

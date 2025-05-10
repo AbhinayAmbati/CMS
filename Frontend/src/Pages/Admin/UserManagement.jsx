@@ -291,9 +291,51 @@ const UserManagement = () => {
 
         {/* Users Table */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading users...</p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {[...Array(5)].map((_, index) => (
+                  <tr key={index} className="animate-pulse">
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                        <div className="ml-4">
+                          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="hidden sm:table-cell px-4 sm:px-6 py-4">
+                      <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="hidden sm:table-cell px-4 sm:px-6 py-4">
+                      <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="flex justify-end gap-3">
+                        <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="overflow-x-auto">

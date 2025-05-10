@@ -27,7 +27,7 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="h-full bg-white border-r border-gray-200 flex flex-col">
+    <div className="h-full bg-white border-r border-gray-200 flex flex-col mt-20">
       <div className="p-4 sm:p-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800">CMS Admin</h1>
       </div>

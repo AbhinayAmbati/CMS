@@ -299,7 +299,7 @@ const Signup = () => {
                 className={`h-4 w-4 mt-1 sm:mt-0 text-blue-600 border-gray-300 rounded focus:ring-blue-500 ${errors.terms ? 'border-red-500' : ''}`}
               />
               <label htmlFor="terms" className="ml-2 block text-xs sm:text-sm text-gray-700">
-                I agree to the <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
+                I agree to the <Link to="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link to="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</Link>
               </label>
             </div>
             {errors.terms && <p className="mt-1 text-red-500 text-xs">{errors.terms}</p>}

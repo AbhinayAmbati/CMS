@@ -14,7 +14,7 @@ const AdminLayout = ({ children }) => {
       {/* Mobile menu button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-0 p-2 mt-18 rounded-md text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black lg:hidden"
+        className="fixed top-0 left-0 z-0 p-2 mt-18 rounded-md text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black lg:hidden"
       >
         {isSidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
       </button>

@@ -30,7 +30,7 @@ const Login = () => {
       login(data.jwtToken, data.user);
       navigate('/dashboard');
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred');
+      setError(error.message || 'An error occurred');
     }
   };
 
@@ -42,11 +42,13 @@ const Login = () => {
     }
 
     try {
-      await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
+      const response = await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
       setResetEmailSent(true);
       setError('');
+      console.log(response);
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to send reset email');
+      console.log(error);
+      setError(error.message || 'Failed to send reset email');
     }
   };
 

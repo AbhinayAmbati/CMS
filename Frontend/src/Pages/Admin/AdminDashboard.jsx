@@ -276,9 +276,87 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-gray-600">Loading dashboard data...</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 sm:mb-8">
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse mt-2"></div>
+          </div>
+
+          {/* Quick Stats Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="h-10 w-10 bg-gray-200 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[...Array(2)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                <div className="h-6 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
+                <div className="h-[200px] sm:h-[300px] bg-gray-100 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[...Array(2)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                <div className="h-6 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
+                <div className="h-[200px] sm:h-[300px] bg-gray-100 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Recent Content Table Skeleton */}
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="h-6 w-40 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {[...Array(3)].map((_, index) => (
+                      <th key={index} className="px-4 sm:px-6 py-3">
+                        <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {[...Array(5)].map((_, index) => (
+                    <tr key={index}>
+                      {[...Array(3)].map((_, cellIndex) => (
+                        <td key={cellIndex} className="px-4 sm:px-6 py-4">
+                          <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Admin Modules Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="h-12 w-12 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </AdminLayout>
