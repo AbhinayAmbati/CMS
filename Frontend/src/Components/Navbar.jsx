@@ -1,20 +1,42 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { FaBars, FaTimes } from 'react-icons/fa'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaBars, FaTimes, FaUser } from 'react-icons/fa'
+import { useAuth } from '../context/AuthContext'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentUser, logout, isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  const navLinks = [
-    { id: 1, title: "Home", path: "/" },
-    { id: 2, title: "Blog", path: "/blog" },
-    { id: 3, title: "Dashboard", path: "/dashboard" }
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    setIsOpen(false);
+  };
+
+  // Define navigation links based on authentication status
+  const getNavLinks = () => {
+    const links = [
+      { id: 1, title: "Home", path: "/" },
+      { id: 2, title: "Blog", path: "/blog" },
+    ];
+
+    if (currentUser) {
+      links.push({ id: 3, title: "Dashboard", path: "/dashboard" });
+      
+      if (isAdmin()) {
+        links.push({ id: 4, title: "Admin", path: "/admin" });
+      }
+    }
     
-  ];
+    return links;
+  };
+
+  const navLinks = getNavLinks();
 
   return (
     <>
@@ -35,8 +57,27 @@ const Navbar = () => {
         
        
         <div className='hidden md:flex items-center gap-4'> 
-          <Link to="/login" className='px-4 py-2 text-gray-600 hover:text-black font-medium transition-colors'>Login</Link>
-          <Link to="/signup" className='px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors font-medium'>Signup</Link>
+          {currentUser ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <FaUser className="text-gray-600" />
+                </div>
+                <span className="text-gray-700 font-medium">{currentUser.name}</span>
+              </div>
+              <button 
+                onClick={handleLogout}
+                className='px-4 py-2 text-gray-600 hover:text-black font-medium transition-colors'
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className='px-4 py-2 text-gray-600 hover:text-black font-medium transition-colors'>Login</Link>
+              <Link to="/signup" className='px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors font-medium'>Signup</Link>
+            </>
+          )}
         </div>
         
        
@@ -90,20 +131,39 @@ const Navbar = () => {
           </div>
           
           <div className="flex flex-col space-y-3 mt-auto">
-            <Link 
-              to="/login" 
-              className='px-4 py-2 text-gray-600 hover:text-black font-medium transition-colors w-full text-center'
-              onClick={toggleMenu}
-            >
-              Login
-            </Link>
-            <Link 
-              to="/signup" 
-              className='px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors font-medium w-full text-center'
-              onClick={toggleMenu}
-            >
-              Signup
-            </Link>
+            {currentUser ? (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                    <FaUser className="text-gray-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">{currentUser.name}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className='px-4 py-2 text-gray-600 hover:text-black font-medium transition-colors w-full text-center'
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/login" 
+                  className='px-4 py-2 text-gray-600 hover:text-black font-medium transition-colors w-full text-center'
+                  onClick={toggleMenu}
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/signup" 
+                  className='px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors font-medium w-full text-center'
+                  onClick={toggleMenu}
+                >
+                  Signup
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
