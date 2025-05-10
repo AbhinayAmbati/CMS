@@ -359,13 +359,15 @@ const UserManagement = () => {
                           >
                             <FaUserEdit />
                           </button>
-                          <button
-                            onClick={() => handleDeleteUser(user.email)}
-                            className="text-red-600 hover:text-red-800 transition-colors"
-                            title="Delete"
-                          >
-                            <FaTrash />
-                          </button>
+                          {!user.admin && (
+                            <button
+                              onClick={() => handleDeleteUser(user.email)}
+                              className="text-red-600 hover:text-red-800 transition-colors"
+                              title="Delete"
+                            >
+                              <FaTrash />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
