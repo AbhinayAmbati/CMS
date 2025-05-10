@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
 import { FaFolder, FaEye, FaNewspaper, FaCode, FaRegEdit, FaCommentAlt, FaUser, FaTimes, FaTrash, FaPencilAlt, FaLock, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -27,9 +26,11 @@ const Dashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   // State for email update flow
-  const [newEmail, setNewEmail] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
+  const [emailData, setEmailData] = useState({
+    newEmail: '',
+    otp: ''
+  });
 
   const {logout} = useAuth();
   const navigate = useNavigate();
@@ -226,13 +227,13 @@ const Dashboard = () => {
       const formData = new FormData();
       
       // Add user data as JSON string
-      const userData = {
+      const userDataToSend = {
         username: profileData.username,
-        email: userData.email, // Keep the existing email since we have a separate flow for updating it
+        email: userData.email, // Use the correct reference to userData
       };
       
       // Append the user data as a JSON string with Content-Type application/json
-      formData.append('user', new Blob([JSON.stringify(userData)], {
+      formData.append('user', new Blob([JSON.stringify(userDataToSend)], {
         type: 'application/json'
       }));
       
@@ -280,7 +281,10 @@ const Dashboard = () => {
         `${API_URL}/api/user/email/update/initiate`,
         { email },
         {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
       console.log(response);
@@ -306,22 +310,28 @@ const Dashboard = () => {
       
       const response = await axios.post(
         `${API_URL}/api/user/email/update/verify`,
-        { otp },
+        { 
+          email: emailData.newEmail,
+          otp: emailData.otp
+        },
         {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
       console.log(response);
       
       setShowEmailEditor(false);
       setOtpSent(false);
-      setOtp('');
-      setNewEmail('');
-      setSuccessMessage('Email updated successfully!');
-      logout();
+      setEmailData({ newEmail: '', otp: '' });
+      setSuccessMessage('Email updated successfully! Please log in again with your new email.');
       
-      // Refresh user profile
-      await fetchUserProfile();
+      // Wait for 2 seconds to show the success message before logging out
+      setTimeout(() => {
+        logout();
+      }, 4000);
       
     } catch (err) {
       console.error('Error verifying OTP:', err);
@@ -349,7 +359,10 @@ const Dashboard = () => {
         `${API_URL}/api/user/updatepassword`,
         { password: passwordData.newPassword },
         {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
       console.log(response);
@@ -465,23 +478,28 @@ const Dashboard = () => {
     );
   };
 
-  // Email Update Component - FIXED VERSION
+  // Email Update Component
   const EmailEditor = () => {
-    const handleNewEmailChange = (e) => {
-      setNewEmail(e.target.value);
-    };
-
-    const handleOtpChange = (e) => {
-      setOtp(e.target.value);
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setEmailData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmitEmail = (e) => {
       e.preventDefault();
-      initiateEmailUpdate(newEmail);
+      if (!emailData.newEmail) {
+        setError('Please enter a new email address');
+        return;
+      }
+      initiateEmailUpdate(emailData.newEmail);
     };
 
     const handleVerifyOtp = (e) => {
       e.preventDefault();
+      if (!emailData.otp) {
+        setError('Please enter the verification code');
+        return;
+      }
       verifyOtpAndUpdateEmail();
     };
 
@@ -505,17 +523,23 @@ const Dashboard = () => {
               <input
                 type="email"
                 id="newEmail"
-                value={newEmail}
-                onChange={handleNewEmailChange}
+                name="newEmail"
+                value={emailData.newEmail}
+                onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
                 required
+                placeholder="Enter new email address"
               />
             </div>
             
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
-                onClick={() => setShowEmailEditor(false)}
+                onClick={() => {
+                  setShowEmailEditor(false);
+                  setEmailData({ newEmail: '', otp: '' });
+                  setError('');
+                }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -535,13 +559,15 @@ const Dashboard = () => {
               <input
                 type="text"
                 id="otp"
-                value={otp}
-                onChange={handleOtpChange}
+                name="otp"
+                value={emailData.otp}
+                onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
                 required
+                placeholder="Enter verification code"
               />
               <p className="mt-1 text-sm text-gray-500">
-                We've sent a verification code to {newEmail}. Please check your inbox and enter the code above.
+                We've sent a verification code to {emailData.newEmail}. Please check your inbox and enter the code above.
               </p>
             </div>
             
@@ -550,7 +576,8 @@ const Dashboard = () => {
                 type="button"
                 onClick={() => {
                   setOtpSent(false);
-                  setOtp('');
+                  setEmailData(prev => ({ ...prev, otp: '' }));
+                  setError('');
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
@@ -709,8 +736,6 @@ const Dashboard = () => {
                 onClick={() => {
                   setShowEmailEditor(false);
                   setOtpSent(false);
-                  setOtp('');
-                  setNewEmail('');
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -814,9 +839,6 @@ const Dashboard = () => {
                 <button 
                   onClick={() => {
                     setShowEmailEditor(true);
-                    setNewEmail('');
-                    setOtpSent(false);
-                    setOtp('');
                   }}
                   className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg flex items-center justify-center"
                 >

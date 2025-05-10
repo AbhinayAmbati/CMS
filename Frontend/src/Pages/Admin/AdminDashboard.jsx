@@ -156,44 +156,6 @@ const AdminDashboard = () => {
       ],
     };
     
-    // Prepare content categories data
-    // In a real app, you'd extract categories from your content
-    // For now, we'll create placeholder categories
-    const contentCategories = {
-      labels: ['Blog Posts', 'Projects', 'News', 'Tutorials', 'Other'],
-      datasets: [
-        {
-          data: [
-            contentsData.filter(c => c && c.title && c.title.toLowerCase().includes('project')).length,
-            contentsData.filter(c => c && c.excerpt && c.excerpt.toLowerCase().includes('project')).length,
-            contentsData.filter(c => c && c.title && c.title.toLowerCase().includes('test')).length,
-            contentsData.filter(c => c && c.title && c.title.toLowerCase().includes('toc')).length,
-            contentsData.filter(c => 
-              c && 
-              (!c.title || !c.title.toLowerCase().includes('project')) && 
-              (!c.excerpt || !c.excerpt.toLowerCase().includes('project')) &&
-              (!c.title || !c.title.toLowerCase().includes('test')) &&
-              (!c.title || !c.title.toLowerCase().includes('toc'))
-            ).length
-          ],
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.7)',
-            'rgba(54, 162, 235, 0.7)',
-            'rgba(255, 206, 86, 0.7)',
-            'rgba(75, 192, 192, 0.7)',
-            'rgba(153, 102, 255, 0.7)',
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
     
     // Prepare content by user data
     const contentByUser = {
@@ -241,7 +203,6 @@ const AdminDashboard = () => {
     
     setChartData({
       userGrowth: userGrowthData,
-      contentCategories,
       contentByUser,
       userTypes: userTypesData
     });
@@ -431,17 +392,11 @@ const AdminDashboard = () => {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">User Growth</h3>
             <div className="h-[200px] sm:h-[300px]">
               {chartData.userGrowth && <Line data={chartData.userGrowth} options={{ maintainAspectRatio: false }} />}
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Content Categories</h3>
-            <div className="h-[200px] sm:h-[300px]">
-              {chartData.contentCategories && <Doughnut data={chartData.contentCategories} options={{ maintainAspectRatio: false }} />}
             </div>
           </div>
         </div>
