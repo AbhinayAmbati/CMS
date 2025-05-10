@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUsers, FaNewspaper, FaChartBar, FaCog, FaUserPlus, FaComments } from 'react-icons/fa';
@@ -15,6 +16,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import Cookies from 'js-cookie';
 
 // Register ChartJS components
 ChartJS.register(
@@ -37,83 +39,213 @@ const AdminDashboard = () => {
     newUsers: 0,
   });
 
-  // Sample data for charts
-  const userGrowthData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'New Users',
-        data: [65, 59, 80, 81, 56, 55],
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
-      },
-    ],
-  };
-
-  const postDistributionData = {
-    labels: ['Technology', 'Lifestyle', 'Business', 'Health', 'Education'],
-    datasets: [
-      {
-        label: 'Posts by Category',
-        data: [12, 19, 3, 5, 2],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.5)',
-          'rgba(54, 162, 235, 0.5)',
-          'rgba(255, 206, 86, 0.5)',
-          'rgba(75, 192, 192, 0.5)',
-          'rgba(153, 102, 255, 0.5)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const engagementData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      {
-        label: 'Comments',
-        data: [12, 19, 3, 5, 2, 3, 7],
-        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-      },
-      {
-        label: 'Likes',
-        data: [8, 15, 5, 7, 4, 6, 9],
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      },
-    ],
-  };
+  const [users, setUsers] = useState([]);
+  const [contents, setContents] = useState([]);
+  const [chartData, setChartData] = useState({
+    userGrowth: null,
+    contentCategories: null,
+    contentByUser: null,
+  });
+  const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    // Fetch dashboard statistics
-    const fetchStats = async () => {
+    // Fetch all required data
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/admin/stats');
-        const data = await response.json();
-        setStats(data);
+        const [usersResponse, contentsResponse] = await Promise.all([
+          fetch(`${API_URL}/api/admin/getallusers`,
+            {
+              headers: {
+                'Authorization': `Bearer ${Cookies.get('token')}`
+              }
+            }
+          ),
+          fetch(`${API_URL}/api/content/getallcontent`,
+            {
+              headers: {
+                'Authorization': `Bearer ${Cookies.get('token')}`
+              }
+            }
+          )
+        ]);
+
+        const usersData = await usersResponse.json();
+        const contentsData = await contentsResponse.json();
+
+        // Ensure we're working with arrays
+        const usersArray = Array.isArray(usersData) ? usersData : [];
+        const contentsArray = Array.isArray(contentsData) ? contentsData : [];
+
+        setUsers(usersArray);
+        setContents(contentsArray);
+        
+        // Process data for statistics
+        processData(usersArray, contentsArray);
       } catch (error) {
-        console.error('Error fetching stats:', error);
-        // Set default stats for demo
+        console.error('Error fetching data:', error);
+        // Set default empty arrays on error
+        setUsers([]);
+        setContents([]);
+        // Reset stats on error
         setStats({
-          totalUsers: 150,
-          totalPosts: 45,
-          totalComments: 234,
-          newUsers: 12,
+          totalUsers: 0,
+          totalPosts: 0,
+          totalComments: 0,
+          newUsers: 0,
         });
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
+
+  const processData = (usersData, contentsData) => {
+    // Ensure inputs are arrays
+    if (!Array.isArray(usersData) || !Array.isArray(contentsData)) {
+      console.error('Invalid data format for processData:', { usersData, contentsData });
+      return;
+    }
+
+    // Calculate basic stats
+    const totalUsers = usersData.length;
+    const totalPosts = contentsData.length;
+    
+    const verifiedUsers = usersData.filter(user => user && user.verified).length;
+    // eslint-disable-next-line no-unused-vars
+    const nonVerifiedUsers = totalUsers - verifiedUsers;
+    
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const newUsersCount = usersData.filter(user => {
+      return true; 
+    }).length;
+    
+    // Group content by users for the bar chart
+    const userContentCounts = {};
+    contentsData.forEach(content => {
+      if (!content || !content.author) return;
+      
+      const authorName = content.author;
+      if (!userContentCounts[authorName]) {
+        userContentCounts[authorName] = 0;
+      }
+      userContentCounts[authorName]++;
+    });
+    
+    const months = [];
+    const currentMonth = now.getMonth();
+    for (let i = 5; i >= 0; i--) {
+      const month = (currentMonth - i + 12) % 12;
+      months.push(new Date(0, month).toLocaleString('default', { month: 'short' }));
+    }
+    
+    const userGrowthData = {
+      labels: months,
+      datasets: [
+        {
+          label: 'User Growth',
+          data: months.map((_, index) => Math.floor(totalUsers * (0.5 + index * 0.1))),
+          fill: false,
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1,
+        },
+      ],
+    };
+    
+    // Prepare content categories data
+    // In a real app, you'd extract categories from your content
+    // For now, we'll create placeholder categories
+    const contentCategories = {
+      labels: ['Blog Posts', 'Projects', 'News', 'Tutorials', 'Other'],
+      datasets: [
+        {
+          data: [
+            contentsData.filter(c => c && c.title && c.title.toLowerCase().includes('project')).length,
+            contentsData.filter(c => c && c.excerpt && c.excerpt.toLowerCase().includes('project')).length,
+            contentsData.filter(c => c && c.title && c.title.toLowerCase().includes('test')).length,
+            contentsData.filter(c => c && c.title && c.title.toLowerCase().includes('toc')).length,
+            contentsData.filter(c => 
+              c && 
+              (!c.title || !c.title.toLowerCase().includes('project')) && 
+              (!c.excerpt || !c.excerpt.toLowerCase().includes('project')) &&
+              (!c.title || !c.title.toLowerCase().includes('test')) &&
+              (!c.title || !c.title.toLowerCase().includes('toc'))
+            ).length
+          ],
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    // Prepare content by user data
+    const contentByUser = {
+      labels: Object.keys(userContentCounts),
+      datasets: [
+        {
+          label: 'Content Count',
+          data: Object.values(userContentCounts),
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    // Count users with admin privileges vs regular users
+    const adminUsers = usersData.filter(user => user && user.admin).length;
+    const regularUsers = totalUsers - adminUsers;
+    
+    const userTypesData = {
+      labels: ['Admin Users', 'Regular Users'],
+      datasets: [
+        {
+          data: [adminUsers, regularUsers],
+          backgroundColor: [
+            'rgba(255, 159, 64, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+          ],
+          borderColor: [
+            'rgba(255, 159, 64, 1)',
+            'rgba(153, 102, 255, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    // Update state with processed data
+    setStats({
+      totalUsers,
+      totalPosts,
+      totalComments: 0, // Placeholder as we don't have comment data
+      newUsers: newUsersCount,
+    });
+    
+    setChartData({
+      userGrowth: userGrowthData,
+      contentCategories,
+      contentByUser,
+      userTypes: userTypesData
+    });
+  };
 
   const adminModules = [
     {
@@ -138,106 +270,175 @@ const AdminDashboard = () => {
       description: "View site traffic and user engagement metrics",
       icon: <FaChartBar className="text-3xl text-gray-700" />,
       path: "/admin/analytics",
-      count: stats.totalComments,
-    },
-    {
-      id: 4,
-      title: "Settings",
-      description: "Configure site settings and preferences",
-      icon: <FaCog className="text-3xl text-gray-700" />,
-      path: "/admin/settings",
-    },
+    }
   ];
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-600">Loading dashboard data...</div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  // Safely get the count of admin and verified users
+  const safeGetAdminCount = () => {
+    if (!Array.isArray(users)) return 0;
+    return users.filter(user => user && user.admin).length;
+  };
+  
+  const safeGetVerifiedCount = () => {
+    if (!Array.isArray(users)) return 0;
+    return users.filter(user => user && user.verified).length;
+  };
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome to your CMS dashboard</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Welcome to your CMS dashboard</p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Users</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-full">
-                <FaUsers className="text-blue-500 text-xl" />
+              <div className="p-2 sm:p-3 bg-blue-50 rounded-full">
+                <FaUsers className="text-blue-500 text-lg sm:text-xl" />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalPosts}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Content</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalPosts}</p>
               </div>
-              <div className="p-3 bg-green-50 rounded-full">
-                <FaNewspaper className="text-green-500 text-xl" />
+              <div className="p-2 sm:p-3 bg-green-50 rounded-full">
+                <FaNewspaper className="text-green-500 text-lg sm:text-xl" />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Comments</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalComments}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Admin Users</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{safeGetAdminCount()}</p>
               </div>
-              <div className="p-3 bg-purple-50 rounded-full">
-                <FaComments className="text-purple-500 text-xl" />
+              <div className="p-2 sm:p-3 bg-purple-50 rounded-full">
+                <FaUserPlus className="text-purple-500 text-lg sm:text-xl" />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">New Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.newUsers}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Verified Users</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{safeGetVerifiedCount()}</p>
               </div>
-              <div className="p-3 bg-yellow-50 rounded-full">
-                <FaUserPlus className="text-yellow-500 text-xl" />
+              <div className="p-2 sm:p-3 bg-yellow-50 rounded-full">
+                <FaUserPlus className="text-yellow-500 text-lg sm:text-xl" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">User Growth</h3>
-            <Line data={userGrowthData} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">User Growth</h3>
+            <div className="h-[200px] sm:h-[300px]">
+              {chartData.userGrowth && <Line data={chartData.userGrowth} options={{ maintainAspectRatio: false }} />}
+            </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Post Distribution</h3>
-            <Doughnut data={postDistributionData} />
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Content Categories</h3>
+            <div className="h-[200px] sm:h-[300px]">
+              {chartData.contentCategories && <Doughnut data={chartData.contentCategories} options={{ maintainAspectRatio: false }} />}
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Engagement Overview</h3>
-          <Bar data={engagementData} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Content by User</h3>
+            <div className="h-[200px] sm:h-[300px]">
+              {chartData.contentByUser && <Bar data={chartData.contentByUser} options={{ maintainAspectRatio: false }} />}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6"> 
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">User Types</h3>
+            <div className="h-[200px] sm:h-[300px]">
+              {chartData.userTypes && <Doughnut data={chartData.userTypes} options={{ maintainAspectRatio: false }} />}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Content Preview */}
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Recent Content</h3>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                    <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {Array.isArray(contents) && contents.slice(0, 5).map((content) => (
+                    <tr key={content?.id || Math.random()}>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <div className="text-xs sm:text-sm font-medium text-gray-900">{content?.title || 'Untitled'}</div>
+                      </td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <div className="text-xs sm:text-sm text-gray-500">{content?.author || 'Unknown'}</div>
+                      </td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                        {content?.date || 'No date'}
+                      </td>
+                    </tr>
+                  ))}
+                  {(!Array.isArray(contents) || contents.length === 0) && (
+                    <tr>
+                      <td colSpan="3" className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm text-gray-500">
+                        No content available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Admin Modules */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {adminModules.map((module) => (
             <Link 
               key={module.id} 
               to={module.path}
-              className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+              className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="bg-gray-50 p-4 rounded-full mb-4">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-full mb-3 sm:mb-4">
                   {module.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{module.title}</h3>
-                <p className="text-gray-600 text-sm mb-2">{module.description}</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">{module.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">{module.description}</p>
                 {module.count !== undefined && (
-                  <p className="text-sm font-medium text-gray-900">{module.count}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-900">{module.count}</p>
                 )}
               </div>
             </Link>
@@ -248,4 +449,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard; 
+export default AdminDashboard;

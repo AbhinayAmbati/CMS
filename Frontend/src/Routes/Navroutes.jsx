@@ -10,7 +10,6 @@ import ProtectedRoute from '../components/ProtectedRoute'
 import AdminDashboard from '../Pages/Admin/AdminDashboard'
 import UserManagement from '../Pages/Admin/UserManagement'
 import Analytics from '../Pages/Admin/Analytics'
-import Settings from '../Pages/Admin/Settings'
 import ResetPassword from '../Pages/ResetPassword'
 import ContentEditor from '../Components/ContentEditor'
 import ContentManagement from '../Pages/Admin/ContentManagement'
@@ -53,11 +52,6 @@ const Navroutes = () => {
         <Route path="/admin/analytics" element={
           <ProtectedRoute requireAdmin={true}>
             <Analytics />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/settings" element={
-          <ProtectedRoute requireAdmin={true}>
-            <Settings />
           </ProtectedRoute>
         } />
     </Routes>

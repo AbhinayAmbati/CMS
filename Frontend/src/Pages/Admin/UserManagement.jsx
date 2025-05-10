@@ -149,12 +149,12 @@ const UserManagement = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">User Management</h1>
           <button
             onClick={handleAddUser}
-            className="bg-black text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+            className="w-full sm:w-auto bg-black text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
           >
             <FaPlus /> Add User
           </button>
@@ -178,112 +178,113 @@ const UserManagement = () => {
 
         {/* User Modal */}
         {showUserModal && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">
-                  {selectedUser ? 'Edit User' : 'Add New User'}
-                </h3>
-                <button 
-                  onClick={() => setShowUserModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <FaTimes />
-                </button>
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 transition-opacity">
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
               </div>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div className="flex space-x-4">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="admin"
-                      name="admin"
-                      checked={formData.admin}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="admin" className="ml-2 block text-sm text-gray-700">
-                      Admin
-                    </label>
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      {selectedUser ? 'Edit User' : 'Add New User'}
+                    </h3>
+                    <button
+                      onClick={() => setShowUserModal(false)}
+                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      <FaTimes size={20} />
+                    </button>
                   </div>
                   
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="verified"
-                      name="verified"
-                      checked={formData.verified}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="verified" className="ml-2 block text-sm text-gray-700">
-                      Verified
-                    </label>
-                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                        Password {selectedUser && '(leave blank to keep current)'}
+                      </label>
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required={!selectedUser}
+                      />
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="admin"
+                          name="admin"
+                          checked={formData.admin}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <label htmlFor="admin" className="ml-2 block text-sm text-gray-700">
+                          Admin
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="verified"
+                          name="verified"
+                          checked={formData.verified}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <label htmlFor="verified" className="ml-2 block text-sm text-gray-700">
+                          Verified
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-5 sm:mt-6">
+                      <button
+                        type="submit"
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                      >
+                        {selectedUser ? 'Update User' : 'Add User'}
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    {selectedUser ? 'Password (leave blank to keep current)' : 'Password'}
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required={!selectedUser}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div className="flex justify-end pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowUserModal(false)}
-                    className="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800"
-                  >
-                    {selectedUser ? 'Update' : 'Add'} User
-                  </button>
-                </div>
-              </form>
+              </div>
             </div>
           </div>
         )}
@@ -299,25 +300,25 @@ const UserManagement = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="6" className="px-4 sm:px-6 py-4 text-center text-gray-500">
                       No users found
                     </td>
                   </tr>
                 ) : (
                   users.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
                             {
@@ -333,39 +334,39 @@ const UserManagement = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 text-sm text-gray-500">{user.email}</td>
+                      <td className="px-4 sm:px-6 py-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           user.admin ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
                         }`}>
                           {user.admin ? 'Admin' : 'User'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="hidden sm:table-cell px-4 sm:px-6 py-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.verified ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
+                          user.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {user.verified ? 'Verified' : 'Unverified'}
+                          {user.verified ? 'Verified' : 'Pending'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
-                          onClick={() => handleEditUser(user)}
-                          className="text-gray-600 hover:text-gray-900 mr-3"
-                          title="Edit user"
-                        >
-                          <FaUserEdit />
-                        </button>
-                        {!user.admin && (
-                          <button 
+                      <td className="hidden sm:table-cell px-4 sm:px-6 py-4 text-sm text-gray-500">{user.id}</td>
+                      <td className="px-4 sm:px-6 py-4 text-right text-sm font-medium">
+                        <div className="flex justify-end gap-3">
+                          <button
+                            onClick={() => handleEditUser(user)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Edit"
+                          >
+                            <FaUserEdit />
+                          </button>
+                          <button
                             onClick={() => handleDeleteUser(user.email)}
-                            className="text-red-400 hover:text-red-600"
-                            title="Delete user"
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                            title="Delete"
                           >
                             <FaTrash />
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))

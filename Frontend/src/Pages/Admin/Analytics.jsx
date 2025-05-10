@@ -14,7 +14,7 @@ import {
   LineElement
 } from 'chart.js';
 import AdminLayout from '../../Components/AdminLayout';
-
+import Cookies from 'js-cookie';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -68,7 +68,13 @@ const Analytics = () => {
     setLoading(true);
     try {
       // Use the existing API endpoints from your controllers
-      const usersResponse = await fetch(`${API_URL}/api/admin/getallusers`);
+      const usersResponse = await fetch(`${API_URL}/api/admin/getallusers`,
+        {
+          headers: {
+            'Authorization': `Bearer ${Cookies.get('token')}`
+          }
+        }
+      );
       const contentResponse = await fetch(`${API_URL}/api/content/getallcontent`);
       
       if (!usersResponse.ok || !contentResponse.ok) {
@@ -288,32 +294,32 @@ const Analytics = () => {
 
   const renderAnalytics = () => (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-full">
-                <FaUsers className="text-blue-500 text-xl" />
+              <div className="p-2 sm:p-3 bg-blue-50 rounded-full">
+                <FaUsers className="text-blue-500 text-lg sm:text-xl" />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Content</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalContent.toLocaleString()}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalContent.toLocaleString()}</p>
               </div>
-              <div className="p-3 bg-purple-50 rounded-full">
-                <FaNewspaper className="text-purple-500 text-xl" />
+              <div className="p-2 sm:p-3 bg-purple-50 rounded-full">
+                <FaNewspaper className="text-purple-500 text-lg sm:text-xl" />
               </div>
             </div>
           </div>
@@ -389,10 +395,10 @@ const Analytics = () => {
         </div>
 
         {/* Original Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Users vs Content</h3>
-            <div style={{ height: '300px' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Users vs Content</h3>
+            <div className="h-[200px] sm:h-[300px]">
               <Bar 
                 data={contentData}
                 options={{
@@ -408,9 +414,9 @@ const Analytics = () => {
             </div>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Content Distribution by Author</h3>
-            <div style={{ height: '300px' }}>
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Content Distribution by Author</h3>
+            <div className="h-[200px] sm:h-[300px]">
               <Pie
                 data={authorData}
                 options={{
@@ -418,7 +424,14 @@ const Analytics = () => {
                   maintainAspectRatio: false,
                   plugins: {
                     legend: {
-                      position: 'bottom'
+                      position: 'bottom',
+                      labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: {
+                          size: 11
+                        }
+                      }
                     }
                   }
                 }}
@@ -428,23 +441,23 @@ const Analytics = () => {
         </div>
         
         {/* Content by Author Table */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Content by Author</h3>
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Content by Author</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content Count</th>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content Count</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {Object.entries(stats.contentByAuthor).map(([author, count], index) => (
                   <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center">
                       <FaPen className="text-gray-400 mr-2" /> {author}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{count}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500">{count}</td>
                   </tr>
                 ))}
               </tbody>

@@ -230,12 +230,12 @@ const ContentManagement = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Content Management</h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Content Management</h1>
           <button
             onClick={openCreateModal}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center gap-2 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors"
           >
             <FaPlus size={14} />
             <span>Add New Content</span>
@@ -250,36 +250,36 @@ const ContentManagement = () => {
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
           <div className="p-4 border-b">
-            <div className="flex flex-wrap gap-4 items-end">
-              <div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
                 <label htmlFor="author-id" className="block text-sm font-medium text-gray-700 mb-1">
                   Filter by Author ID
                 </label>
                 <input
                   type="text"
                   id="author-id"
-                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={filterAuthor}
                   onChange={handleFilterChange}
                   placeholder="Author ID"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleApplyFilter}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors"
+                  className="flex-1 sm:flex-none px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors"
                 >
                   Apply Filter
                 </button>
                 <button
                   onClick={handleShowMyContent}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors"
+                  className="flex-1 sm:flex-none px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors"
                 >
                   My Content
                 </button>
                 <button
                   onClick={fetchContent}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-md transition-colors"
+                  className="flex-1 sm:flex-none px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-md transition-colors"
                 >
                   Show All
                 </button>
@@ -290,19 +290,19 @@ const ContentManagement = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Title
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Author
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Updated
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -311,7 +311,7 @@ const ContentManagement = () => {
                 {content.length > 0 ? (
                   content.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4">
                         <div className="flex items-center">
                           {item.image && (
                             <div className="flex-shrink-0 h-10 w-10 mr-3">
@@ -325,16 +325,16 @@ const ContentManagement = () => {
                           <div className="text-sm font-medium text-gray-900">{item.title}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 sm:px-6 py-4 text-sm text-gray-500">
                         {item.author}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="hidden sm:table-cell px-4 sm:px-6 py-4 text-sm text-gray-500">
                         {item.date}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="hidden sm:table-cell px-4 sm:px-6 py-4 text-sm text-gray-500">
                         {item.updatedAt || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-4 sm:px-6 py-4 text-right text-sm font-medium">
                         <div className="flex justify-end gap-3">
                           <a
                             href={`/content/${item.id}`}
@@ -365,7 +365,7 @@ const ContentManagement = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="5" className="px-4 sm:px-6 py-4 text-center text-gray-500">
                       No content found
                     </td>
                   </tr>
@@ -385,7 +385,7 @@ const ContentManagement = () => {
             </div>
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">
                     {isCreateMode ? 'Create New Content' : 'Edit Content'}
