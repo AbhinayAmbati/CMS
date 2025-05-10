@@ -13,6 +13,8 @@ import Analytics from '../Pages/Admin/Analytics'
 import Settings from '../Pages/Admin/Settings'
 import ResetPassword from '../Pages/ResetPassword'
 import ContentEditor from '../Components/ContentEditor'
+import ContentManagement from '../Pages/Admin/ContentManagement'
+
 const Navroutes = () => {
   return (
     <Routes>
@@ -41,6 +43,11 @@ const Navroutes = () => {
         <Route path="/admin/users" element={
           <ProtectedRoute requireAdmin={true}>
             <UserManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/content" element={
+          <ProtectedRoute requireAdmin={true}>
+            <ContentManagement />
           </ProtectedRoute>
         } />
         <Route path="/admin/analytics" element={

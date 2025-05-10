@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-else-if */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -112,34 +113,39 @@ const ContentPost = () => {
 
   // Parse the data field if it contains JSON
   const renderBlogContent = () => {
-    let contentBlocks = [];
+    if (!blog.data) return null;
+    
     try {
-      if (blog.data && typeof blog.data === 'string' && blog.data.trim() !== '') {
-        const parsedData = JSON.parse(blog.data);
-        if (parsedData.content && parsedData.content.blocks) {
-          contentBlocks = parsedData.content.blocks;
-          
-          return contentBlocks.map((block, index) => renderContent(block, index));
-        }
+      // Check if it's already a parsed object
+      const contentData = typeof blog.data === 'string' ? JSON.parse(blog.data) : blog.data;
+      
+      // Handle EditorJS format
+      if (contentData.blocks) {
+        return contentData.blocks.map((block, index) => renderContent(block, index));
+      } else if (contentData.time && contentData.blocks) {
+        return contentData.blocks.map((block, index) => renderContent(block, index));
       }
       
-      // If we can't parse JSON or there are no blocks, show raw data
-      return <div className="whitespace-pre-wrap">{blog.data}</div>;
+      // Return raw data if we can't determine the format
+      return <div className="whitespace-pre-wrap">{typeof blog.data === 'string' ? blog.data : JSON.stringify(blog.data)}</div>;
     } catch (e) {
       console.error('Error parsing blog data:', e);
+      // If parsing fails, display as plain text
       return <div className="whitespace-pre-wrap">{blog.data}</div>;
     }
   };
 
   const renderContent = (block, index) => {
+    if (!block || !block.type) return null;
+    
     switch (block.type) {
       case 'header':
-        const HeaderTag = `h${block.data.level}`;
+        { const HeaderTag = `h${block.data.level}`;
         return (
           <HeaderTag key={index} className={`font-bold mb-4 ${block.data.level === 1 ? 'text-3xl' : block.data.level === 2 ? 'text-2xl' : 'text-xl'}`}>
             {block.data.text}
           </HeaderTag>
-        );
+        ); }
       case 'paragraph':
         return <p key={index} className="mb-4" dangerouslySetInnerHTML={{ __html: block.data.text }} />;
       case 'list':
@@ -193,6 +199,9 @@ const ContentPost = () => {
           </figure>
         );
       default:
+        if (block.data && block.data.text) {
+          return <p key={index} className="mb-4">{block.data.text}</p>;
+        }
         return null;
     }
   };
@@ -201,7 +210,7 @@ const ContentPost = () => {
     <div className="min-h-screen pt-24 bg-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
-          <Link to="/blog" className="text-black hover:underline flex items-center">
+          <Link to="/content" className="text-black hover:underline flex items-center">
             <FiArrowLeft className="mr-2" /> Back to Blog
           </Link>
           

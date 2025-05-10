@@ -8,6 +8,7 @@ import Link from '@editorjs/link';
 import Quote from '@editorjs/quote';
 import Paragraph from '@editorjs/paragraph';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const ContentEditor = ({ initialData, onSave }) => {
   const editorRef = useRef(null);
@@ -43,12 +44,12 @@ const ContentEditor = ({ initialData, onSave }) => {
             class: Image,
             config: {
               endpoints: {
-                byFile: `${API_URL}/api/upload`,
-                byUrl: `${API_URL}/api/fetch-image`
+                byFile: `${API_URL}/api/image/addimage`,
+                byUrl: `${API_URL}/api/image/getimage`
               },
               additionalRequestData: {
                 // This will be sent with your image upload request
-                authorization: `Bearer ${localStorage.getItem('token')}`
+                authorization: `Bearer ${Cookies.get('token')}`
               }
             }
           },
@@ -112,9 +113,6 @@ const ContentEditor = ({ initialData, onSave }) => {
       if (initialData?.id) {
         // Update existing post
         await saveToBackend(initialData.id, postData);
-      } else {
-        // Create new post
-        await saveToBackend(null, postData);
       }
       
       // Notify parent component
@@ -128,7 +126,7 @@ const ContentEditor = ({ initialData, onSave }) => {
   };
   
   const saveToBackend = async (id, postData) => {
-    const token = localStorage.getItem('token');
+    const token = Cookies.get('token');
     if (!token) {
       throw new Error('Authentication token not found');
     }
@@ -147,7 +145,7 @@ const ContentEditor = ({ initialData, onSave }) => {
     
     if (id) {
       // Update existing post
-      await axios.put(`${API_URL}/api/content/update/${id}`, formData, config);
+      await axios.post(`${API_URL}/api/content/update/${id}`, formData, config);
     } else {
       // Create new post
       await axios.post(`${API_URL}/api/content/addcontent`, formData, config);
