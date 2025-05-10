@@ -40,19 +40,50 @@ const ContentEditor = ({ initialData, onSave }) => {
             class: List,
             inlineToolbar: true,
           },
-          image: {
-            class: Image,
-            config: {
-              endpoints: {
-                byFile: `${API_URL}/api/image/addimage`,
-                byUrl: `${API_URL}/api/image/getimage`
-              },
-              additionalRequestData: {
-                // This will be sent with your image upload request
-                authorization: `Bearer ${Cookies.get('token')}`
-              }
+          // Inside ContentEditor.jsx useEffect function
+image: {
+  class: Image,
+  config: {
+    endpoints: {
+      byFile: `${API_URL}/api/image/addimage`, // This should match your backend endpoint
+    },
+    uploader: {
+      uploadByFile(file) {
+        const token = Cookies.get('token');
+        
+        // Create a FormData instance
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        // Return a Promise with the upload logic
+        return axios.post(`${API_URL}/api/image/addimage`, 
+          formData, 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
             }
-          },
+          })
+          .then(response => {
+            // EditorJS expects this exact response format
+            return {
+              success: 1,
+              file: {
+                url: response.data
+              }
+            };
+          })
+          .catch(error => {
+            console.error('Image upload error:', error);
+            return {
+              success: 0,
+              file: {
+                url: ''
+              }
+            };
+          });
+      }
+    }},
           code: Code,
           link: Link,
           quote: {

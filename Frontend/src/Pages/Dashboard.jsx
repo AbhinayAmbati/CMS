@@ -43,6 +43,7 @@ const Dashboard = () => {
       if (response.data) {
         setUserData(response.data);
       }
+      console.log(response.data);
     } catch (err) {
       console.error('Error fetching user profile:', err);
       // Don't set error - we don't want to disrupt the entire dashboard if just profile fetch fails
@@ -181,15 +182,26 @@ const Dashboard = () => {
         setError('Authentication token not found. Please log in again.');
         return;
       }
-
+  
+      // Create a FormData object for the image file
       const formData = new FormData();
-      formData.append('username', profileData.username);
-      formData.append('email', profileData.email);
       
+      // Add user data as JSON string
+      const userData = {
+        username: profileData.username,
+        email: profileData.email,
+      };
+      
+      // Append the user data as a JSON string with Content-Type application/json
+      formData.append('user', new Blob([JSON.stringify(userData)], {
+        type: 'application/json'
+      }));
+      
+      // Add the image if it exists
       if (profileData.image && profileData.image instanceof File) {
         formData.append('image', profileData.image);
       }
-
+  
       await axios.post(
         `${API_URL}/api/user/updateuser`,
         formData,

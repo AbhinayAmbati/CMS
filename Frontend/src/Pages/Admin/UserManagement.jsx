@@ -74,15 +74,15 @@ const UserManagement = () => {
     setShowUserModal(true);
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (email) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await api.delete('/api/admin/deleteuser', {
-          data: { id: userId }
+          data: { email: email }
         });
 
         // Remove user from state
-        setUsers(users.filter(user => user.id !== userId));
+        setUsers(users.filter(user => user.email !== email));
         showSuccess('User deleted successfully');
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to delete user');
@@ -353,7 +353,7 @@ const UserManagement = () => {
                         </button>
                         {!user.admin && (
                           <button 
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user.email)}
                             className="text-red-400 hover:text-red-600"
                             title="Delete user"
                           >
