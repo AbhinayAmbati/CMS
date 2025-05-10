@@ -14,13 +14,52 @@ const ContentEditor = ({ initialData, onSave }) => {
   const editorRef = useRef(null);
   const [title, setTitle] = useState(initialData?.title || '');
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || '');
+  // eslint-disable-next-line no-unused-vars
+  const [coverImage, setCoverImage] = useState(initialData?.coverImage || '');
+  const [coverImageFile, setCoverImageFile] = useState(null);
+  const [coverImagePreview, setCoverImagePreview] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [error, setError] = useState('');
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Debug initial values
+  useEffect(() => {
+    console.log('ContentEditor initialData:', initialData);
+    
+    // Set cover image preview from initialData if available
+    if (initialData?.coverImage) {
+      setCoverImagePreview(initialData.coverImage);
+    }
+  }, [initialData]);
+
   useEffect(() => {
     if (!editorRef.current) {
+      // Parse initial editor data if available
+      let initialEditorData;
+      try {
+        initialEditorData = initialData?.data ? JSON.parse(initialData.data) : null;
+      } catch (e) {
+        console.error('Error parsing initial editor data:', e);
+        initialEditorData = null;
+      }
+
+      // If we couldn't parse the data or it wasn't provided, use default content
+      if (!initialEditorData) {
+        initialEditorData = {
+          blocks: [
+            {
+              type: "paragraph",
+              data: {
+                text: "Start writing your blog post..."
+              }
+            }
+          ]
+        };
+      }
+
+      console.log('Initializing EditorJS with data:', initialEditorData);
+
       const editor = new EditorJS({
         holder: 'editorjs',
         tools: {
@@ -40,50 +79,48 @@ const ContentEditor = ({ initialData, onSave }) => {
             class: List,
             inlineToolbar: true,
           },
-          // Inside ContentEditor.jsx useEffect function
-image: {
-  class: Image,
-  config: {
-    endpoints: {
-      byFile: `${API_URL}/api/image/addimage`, // This should match your backend endpoint
-    },
-    uploader: {
-      uploadByFile(file) {
-        const token = Cookies.get('token');
-        
-        // Create a FormData instance
-        const formData = new FormData();
-        formData.append('image', file);
-        
-        // Return a Promise with the upload logic
-        return axios.post(`${API_URL}/api/image/addimage`, 
-          formData, 
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
+          image: {
+            class: Image,
+            config: {
+              endpoints: {
+                byFile: `${API_URL}/api/image/addimage`,
+              },
+              uploader: {
+                uploadByFile(file) {
+                  const token = Cookies.get('token');
+                  
+                  const formData = new FormData();
+                  formData.append('image', file);
+                  
+                  return axios.post(`${API_URL}/api/image/addimage`, 
+                    formData, 
+                    {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                      }
+                    })
+                    .then(response => {
+                      return {
+                        success: 1,
+                        file: {
+                          url: response.data
+                        }
+                      };
+                    })
+                    .catch(error => {
+                      console.error('Image upload error:', error);
+                      return {
+                        success: 0,
+                        file: {
+                          url: ''
+                        }
+                      };
+                    });
+                }
+              }
             }
-          })
-          .then(response => {
-            // EditorJS expects this exact response format
-            return {
-              success: 1,
-              file: {
-                url: response.data
-              }
-            };
-          })
-          .catch(error => {
-            console.error('Image upload error:', error);
-            return {
-              success: 0,
-              file: {
-                url: ''
-              }
-            };
-          });
-      }
-    }},
+          },
           code: Code,
           link: Link,
           quote: {
@@ -91,20 +128,16 @@ image: {
             inlineToolbar: true,
           }
         },
-        data: initialData?.data ? JSON.parse(initialData.data) : {
-          blocks: [
-            {
-              type: "paragraph",
-              data: {
-                text: "Start writing your blog post..."
-              }
-            }
-          ]
-        },
+        data: initialEditorData,
         onReady: () => {
+          console.log('EditorJS is ready');
           setIsEditorReady(true);
+        },
+        onChange: () => {
+          console.log('EditorJS content changed');
         }
       });
+      
       editorRef.current = editor;
     }
     
@@ -120,8 +153,23 @@ image: {
     };
   }, [initialData, isEditorReady]);
 
+  const handleCoverImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setCoverImageFile(file);
+    
+    // Create a preview URL
+    const imagePreviewUrl = URL.createObjectURL(file);
+    setCoverImagePreview(imagePreviewUrl);
+  };
+
   const handleSave = async () => {
-    if (!editorRef.current || !isEditorReady) return;
+    if (!editorRef.current || !isEditorReady) {
+      console.error('Editor not ready');
+      return;
+    }
+    
     if (!title.trim()) {
       setError('Please enter a title for your post');
       return;
@@ -131,55 +179,38 @@ image: {
     setError('');
     
     try {
+      console.log('Getting editor content...');
       const outputData = await editorRef.current.save();
+      console.log('EditorJS output:', outputData);
       
-      // For local state update
+      if (!outputData || !outputData.blocks || outputData.blocks.length === 0) {
+        console.warn('Editor output may be empty:', outputData);
+      }
+      
+      // We'll pass the content to the parent component instead of saving directly
+      // This prevents duplicate save operations
       const postData = {
-        title,
-        excerpt,
-        data: JSON.stringify(outputData)
+        title: title,
+        excerpt: excerpt || '',
+        data: JSON.stringify(outputData),
+        id: initialData?.id, // Pass the ID if we're updating
+        coverImage: coverImage || null, // Pass existing coverImage if available
       };
       
-      // Call the API to save the content
-      if (initialData?.id) {
-        // Update existing post
-        await saveToBackend(initialData.id, postData);
-      }
+      console.log('Passing post data to parent component:', postData);
       
-      // Notify parent component
-      onSave(postData);
+      // Call the parent's onSave handler with the data
+      if (typeof onSave === 'function') {
+        // Also pass the coverImageFile if we have one
+        await onSave({...postData, image: coverImageFile});
+      } else {
+        console.error('No onSave handler provided');
+      }
     } catch (error) {
-      console.error('Error saving post:', error);
-      setError('Failed to save post. Please try again.');
+      console.error('Error preparing post data:', error);
+      setError('Failed to prepare post data. Please try again.');
     } finally {
       setIsSaving(false);
-    }
-  };
-  
-  const saveToBackend = async (id, postData) => {
-    const token = Cookies.get('token');
-    if (!token) {
-      throw new Error('Authentication token not found');
-    }
-    
-    const formData = new FormData();
-    formData.append('title', postData.title);
-    formData.append('excerpt', postData.excerpt || '');
-    formData.append('data', postData.data);
-    
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    };
-    
-    if (id) {
-      // Update existing post
-      await axios.post(`${API_URL}/api/content/update/${id}`, formData, config);
-    } else {
-      // Create new post
-      await axios.post(`${API_URL}/api/content/addcontent`, formData, config);
     }
   };
 
@@ -191,14 +222,78 @@ image: {
         </div>
       )}
       
-      <div className="mb-6">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter blog title"
-          className="w-full text-2xl font-bold border-none focus:outline-none focus:ring-0"
-        />
+      <div className="mb-6 flex flex-col md:flex-row md:items-start gap-4">
+        <div className="flex-grow">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter blog title"
+            className="w-full text-2xl font-bold border-none focus:outline-none focus:ring-0"
+          />
+        </div>
+        
+        <div className="md:w-1/3">
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm font-medium text-gray-700">
+              Cover Image
+            </label>
+            
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleCoverImageChange}
+              className="hidden"
+              id="cover-image-input"
+            />
+            
+            <label 
+              htmlFor="cover-image-input" 
+              className="cursor-pointer"
+            >
+              {coverImagePreview ? (
+                <div className="relative w-full h-40 mb-2">
+                  <img 
+                    src={coverImagePreview} 
+                    alt="Cover preview" 
+                    className="w-full h-full object-cover rounded-md" 
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
+                    <span className="text-white text-sm bg-black bg-opacity-50 px-3 py-1 rounded-md">
+                      Change Image
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-40 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center mb-2">
+                  <div className="text-center">
+                    <svg 
+                      className="mx-auto h-12 w-12 text-gray-400" 
+                      stroke="currentColor" 
+                      fill="none" 
+                      viewBox="0 0 48 48" 
+                      aria-hidden="true"
+                    >
+                      <path 
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                        strokeWidth={2} 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                      />
+                    </svg>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Add cover image
+                    </p>
+                  </div>
+                </div>
+              )}
+            </label>
+            
+            <p className="text-xs text-gray-500">
+              Recommended: 1200×630px or larger
+            </p>
+          </div>
+        </div>
       </div>
       
       <div className="mb-6">

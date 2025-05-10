@@ -1,9 +1,11 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect } from 'react';
-import { FaFolder, FaEye, FaNewspaper, FaCode, FaRegEdit, FaCommentAlt, FaUser, FaTimes, FaTrash, FaPencilAlt } from 'react-icons/fa';
+import { FaFolder, FaEye, FaNewspaper, FaCode, FaRegEdit, FaCommentAlt, FaUser, FaTimes, FaTrash, FaPencilAlt, FaLock, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import ContentEditor from '../Components/ContentEditor';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
   const [showBlogEditor, setShowBlogEditor] = useState(false);
@@ -12,12 +14,22 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [showEmailEditor, setShowEmailEditor] = useState(false);
+  const [showPasswordEditor, setShowPasswordEditor] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
   const [userData, setUserData] = useState({
     username: "User",
     email: "",
     profileImage: "https://imgs.search.brave.com/Wy9yeON3-cT0jG1XYVChtQhRHqReCB8MUuscX8tdfx0/rs:fit:500:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89", 
   });
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // State for email update flow
+  const [newEmail, setNewEmail] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+
+  const {logout} = useAuth();
 
   // Fetch user posts and profile info on component mount
   useEffect(() => {
@@ -117,6 +129,8 @@ const Dashboard = () => {
   };
 
   const handleSavePost = async (postData) => {
+    setError('');
+    
     try {
       const token = Cookies.get('token');
       if (!token) {
@@ -124,58 +138,80 @@ const Dashboard = () => {
         return;
       }
 
+      // Create a FormData object for the API request
       const formData = new FormData();
+      
+      // Explicitly set all fields
       formData.append('title', postData.title);
+      formData.append('excerpt', postData.excerpt || '');
+      formData.append('data', postData.data || '{}');
       
-      if (postData.excerpt) {
-        formData.append('excerpt', postData.excerpt);
+      // For update operations where we have a coverImage URL and no new file
+      if (postData.coverImage && !postData.image) {
+        formData.append('coverImage', postData.coverImage);
       }
       
-      if (postData.content) {
-        formData.append('data', postData.content);
-      }
-      
+      // For operations with a new cover image file
       if (postData.image && postData.image instanceof File) {
         formData.append('image', postData.image);
+        console.log('Adding image file to request:', postData.image.name);
       }
-
-      if (selectedPost) {
+      
+      // Log what we're sending to help with debugging
+      console.log('Form data being sent for post save/update:');
+      for (let pair of formData.entries()) {
+        if (pair[0] === 'image') {
+          console.log(`${pair[0]}: [File object - ${pair[1].name}]`);
+        } else if (pair[0] === 'data') {
+          console.log(`${pair[0]}: [Large JSON data]`);
+        } else {
+          console.log(`${pair[0]}: ${pair[1]}`);
+        }
+      }
+      
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+      
+      let response;
+      
+      if (postData.id) {
         // Update existing post
-        await axios.put(
-          `${API_URL}/api/content/update/${selectedPost.id}`,
+        console.log(`Sending PUT request to ${API_URL}/api/content/update/${postData.id}`);
+        response = await axios.put(
+          `${API_URL}/api/content/update/${postData.id}`,
           formData,
-          {
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
+          config
         );
       } else {
         // Create new post
-        await axios.post(
+        console.log(`Sending POST request to ${API_URL}/api/content/addcontent`);
+        response = await axios.post(
           `${API_URL}/api/content/addcontent`,
           formData,
-          {
-            headers: { 
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
+          config
         );
       }
       
+      console.log('API response:', response.data);
+      
       setShowBlogEditor(false);
-      // Refresh posts to get updated list
+      // Refresh the posts list to show the latest changes
       await fetchUserPosts();
       
     } catch (err) {
       console.error('Error saving post:', err);
       setError('Failed to save post. Please try again.');
-    }
+    } 
   };
 
   const handleUpdateProfile = async (profileData) => {
+    setError('');
+    setSuccessMessage('');
+    
     try {
       const token = Cookies.get('token');
       if (!token) {
@@ -189,7 +225,7 @@ const Dashboard = () => {
       // Add user data as JSON string
       const userData = {
         username: profileData.username,
-        email: profileData.email,
+        email: userData.email, // Keep the existing email since we have a separate flow for updating it
       };
       
       // Append the user data as a JSON string with Content-Type application/json
@@ -202,7 +238,7 @@ const Dashboard = () => {
         formData.append('image', profileData.image);
       }
   
-      await axios.post(
+      const response = await axios.post(
         `${API_URL}/api/user/updateuser`,
         formData,
         {
@@ -212,8 +248,11 @@ const Dashboard = () => {
           }
         }
       );
+      console.log(response);
       
       setShowProfileEditor(false);
+      setSuccessMessage('Profile updated successfully!');
+      
       // Refresh user profile
       await fetchUserProfile();
       
@@ -222,12 +261,109 @@ const Dashboard = () => {
       setError('Failed to update profile. Please try again.');
     }
   };
+  
+  const initiateEmailUpdate = async (email) => {
+    setError('');
+    setSuccessMessage('');
+    
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('Authentication token not found. Please log in again.');
+        return;
+      }
+      
+      const response = await axios.post(
+        `${API_URL}/api/user/email/update/initiate`,
+        { email },
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      console.log(response);
+      setOtpSent(true);
+      setSuccessMessage('OTP sent to your new email address. Please check your inbox.');
+      
+    } catch (err) {
+      console.error('Error initiating email update:', err);
+      setError(err.response?.data?.message || 'Failed to initiate email update. Please try again.');
+    }
+  };
+  
+  const verifyOtpAndUpdateEmail = async () => {
+    setError('');
+    setSuccessMessage('');
+    
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('Authentication token not found. Please log in again.');
+        return;
+      }
+      
+      const response = await axios.post(
+        `${API_URL}/api/user/email/update/verify`,
+        { otp },
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      console.log(response);
+      
+      setShowEmailEditor(false);
+      setOtpSent(false);
+      setOtp('');
+      setNewEmail('');
+      setSuccessMessage('Email updated successfully!');
+      logout();
+      
+      // Refresh user profile
+      await fetchUserProfile();
+      
+    } catch (err) {
+      console.error('Error verifying OTP:', err);
+      setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
+    }
+  };
+  
+  const handleUpdatePassword = async (passwordData) => {
+    setError('');
+    setSuccessMessage('');
+    
+    try {
+      const token = Cookies.get('token');
+      if (!token) {
+        setError('Authentication token not found. Please log in again.');
+        return;
+      }
+      
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        setError('New passwords do not match.');
+        return;
+      }
+      
+      const response = await axios.post(
+        `${API_URL}/api/user/updatepassword`,
+        { password: passwordData.newPassword },
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      console.log(response);
+      
+      setShowPasswordEditor(false);
+      setSuccessMessage('Password updated successfully!');
+      
+    } catch (err) {
+      console.error('Error updating password:', err);
+      setError(err.response?.data?.message || 'Failed to update password. Please try again.');
+    }
+  };
 
   // Profile Editor Component
   const ProfileEditor = ({ userData, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       username: userData?.username || '',
-      email: userData?.email || '',
       image: null
     });
     const [imagePreview, setImagePreview] = useState(userData?.profileImage || null);
@@ -282,19 +418,6 @@ const Dashboard = () => {
           />
         </div>
         
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
-            required
-          />
-        </div>
-        
         <div className="flex justify-end space-x-3 pt-4">
           <button
             type="button"
@@ -308,6 +431,181 @@ const Dashboard = () => {
             className="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800"
           >
             Save Changes
+          </button>
+        </div>
+      </form>
+    );
+  };
+
+  // Email Update Component - FIXED VERSION
+  const EmailEditor = () => {
+    const handleNewEmailChange = (e) => {
+      setNewEmail(e.target.value);
+    };
+
+    const handleOtpChange = (e) => {
+      setOtp(e.target.value);
+    };
+
+    const handleSubmitEmail = (e) => {
+      e.preventDefault();
+      initiateEmailUpdate(newEmail);
+    };
+
+    const handleVerifyOtp = (e) => {
+      e.preventDefault();
+      verifyOtpAndUpdateEmail();
+    };
+
+    return (
+      <div className="space-y-4">
+        {!otpSent ? (
+          <form onSubmit={handleSubmitEmail} className="space-y-4">
+            <div>
+              <label htmlFor="currentEmail" className="block text-sm font-medium text-gray-700 mb-1">Current Email</label>
+              <input
+                type="email"
+                id="currentEmail"
+                value={userData.email}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50"
+                disabled
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="newEmail" className="block text-sm font-medium text-gray-700 mb-1">New Email</label>
+              <input
+                type="email"
+                id="newEmail"
+                value={newEmail}
+                onChange={handleNewEmailChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+                required
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowEmailEditor(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800"
+              >
+                Send Verification Code
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="space-y-4">
+            <div>
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">Enter Verification Code</label>
+              <input
+                type="text"
+                id="otp"
+                value={otp}
+                onChange={handleOtpChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+                required
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                We've sent a verification code to {newEmail}. Please check your inbox and enter the code above.
+              </p>
+            </div>
+            
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setOtpSent(false);
+                  setOtp('');
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800"
+              >
+                Verify & Update
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    );
+  };
+
+  // Password Update Component
+  const PasswordEditor = () => {
+    const [passwordData, setPasswordData] = useState({
+      newPassword: '',
+      confirmPassword: ''
+    });
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setPasswordData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      handleUpdatePassword(passwordData);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+          <input
+            type="password"
+            id="newPassword"
+            name="newPassword"
+            value={passwordData.newPassword}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+            required
+            minLength="6"
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={passwordData.confirmPassword}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+            required
+          />
+          {passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
+            <p className="mt-1 text-sm text-red-600">
+              Passwords do not match
+            </p>
+          )}
+        </div>
+        
+        <div className="flex justify-end space-x-3 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowPasswordEditor(false)}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800"
+            disabled={!passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
+          >
+            Update Password
           </button>
         </div>
       </form>
@@ -374,10 +672,55 @@ const Dashboard = () => {
         </div>
       )}
 
+      {showEmailEditor && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Update Email Address</h3>
+              <button 
+                onClick={() => {
+                  setShowEmailEditor(false);
+                  setOtpSent(false);
+                  setOtp('');
+                  setNewEmail('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <EmailEditor />
+          </div>
+        </div>
+      )}
+
+      {showPasswordEditor && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Change Password</h3>
+              <button 
+                onClick={() => setShowPasswordEditor(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <PasswordEditor />
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8">
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
             {error}
+          </div>
+        )}
+        
+        {successMessage && (
+          <div className="bg-green-50 text-green-600 p-4 rounded-lg mb-6">
+            {successMessage}
           </div>
         )}
         
@@ -396,12 +739,34 @@ const Dashboard = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-800">{userData.username}</h2>
               <p className="text-gray-600">{userData.email}</p>
-              <button 
-                onClick={() => setShowProfileEditor(true)}
-                className="mt-4 text-sm text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <FaRegEdit className="mr-1" /> Edit Profile
-              </button>
+              
+              <div className="mt-6 space-y-2 w-full">
+                <button 
+                  onClick={() => setShowProfileEditor(true)}
+                  className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg flex items-center justify-center"
+                >
+                  <FaUser className="mr-2" /> Edit Profile
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    setShowEmailEditor(true);
+                    setNewEmail('');
+                    setOtpSent(false);
+                    setOtp('');
+                  }}
+                  className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg flex items-center justify-center"
+                >
+                  <FaEnvelope className="mr-2" /> Change Email
+                </button>
+                
+                <button 
+                  onClick={() => setShowPasswordEditor(true)}
+                  className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg flex items-center justify-center"
+                >
+                  <FaLock className="mr-2" /> Change Password
+                </button>
+              </div>
             </div>
           </div>
 
@@ -445,7 +810,7 @@ const Dashboard = () => {
                   {recentPosts.map((post) => (
                     <div key={post.id} className="flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
                       <div>
-                        <Link to={`/blog/${post.id}`} className="text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
+                        <Link to={`/content/${post.id}`} className="text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
                           {post.title}
                         </Link>
                         <p className="text-sm text-gray-500 mt-1">Published on {formatDate(post.date)}</p>

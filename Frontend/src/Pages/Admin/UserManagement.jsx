@@ -320,7 +320,13 @@ const UserManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
-                            <FaUser className="text-gray-500" />
+                            {
+                              user.profileImage ? (
+                                <img src={user.profileImage} alt="Profile" className="w-10 h-10 rounded-full" />
+                              ) : (
+                                <FaUser className="text-gray-500" />
+                              )
+                            }
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">{user.username}</div>

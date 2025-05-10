@@ -91,7 +91,8 @@ const Content = () => {
       }
     } catch (e) {
       // If parsing fails or no paragraph found, return a placeholder
-      return "Read more about this article...";
+      console.log(e);
+      return "Read more about this article..." ;
     }
     
     return "Read more about this article...";

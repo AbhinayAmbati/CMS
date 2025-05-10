@@ -6,7 +6,6 @@ export const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { currentUser, isAdmin } = useAuth();
 
   if (!currentUser) {
-    // Redirect to login if not authenticated
     return <Navigate to="/login" replace />;
   }
 
