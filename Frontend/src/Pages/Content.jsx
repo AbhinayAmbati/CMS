@@ -9,13 +9,13 @@ const Content = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterAuthor, setFilterAuthor] = useState('');
-  const [sorting, setSorting] = useState('newest'); // 'newest', 'oldest', 'alphabetical'
+  const [sorting, setSorting] = useState('newest'); 
   const [authors, setAuthors] = useState([]);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    // Fetch all content from backend API when component mounts
+  
     const fetchContent = async () => {
       try {
         setLoading(true);

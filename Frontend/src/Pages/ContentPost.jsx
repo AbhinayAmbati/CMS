@@ -14,23 +14,22 @@ const ContentPost = () => {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // Check if user is logged in and retrieve token
   const getToken = () => {
     return localStorage.getItem('authToken');
   };
 
-  // Check if user is authorized to edit/delete
+  
   const checkOwnership = async (authorId) => {
     const token = getToken();
     if (!token) return false;
     
     try {
-      // Get user info from token
+    
       const userResponse = await axios.get(`${API_URL}/api/auth/user`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Check if user is admin or author of the post
+   
       if (userResponse.data.admin || userResponse.data.id === authorId) {
         setIsOwner(true);
         return true;

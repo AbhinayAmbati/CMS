@@ -17,7 +17,7 @@ const Dashboard = () => {
     profileImage: "https://imgs.search.brave.com/Wy9yeON3-cT0jG1XYVChtQhRHqReCB8MUuscX8tdfx0/rs:fit:500:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89", 
   });
 
-  // Fetch user posts on component mount
+
   useEffect(() => {
     fetchUserPosts();
   }, []);
@@ -79,7 +79,7 @@ const Dashboard = () => {
         }
       );
       
-      // Update local state
+     
       setRecentPosts(recentPosts.filter(post => post.id !== postId));
       
     } catch (err) {
@@ -89,14 +89,14 @@ const Dashboard = () => {
   };
 
   const handleSavePost = async (postData) => {
-    // Content was saved in ContentEditor component
+
     setShowBlogEditor(false);
     
-    // Refresh posts to get updated list
+   
     await fetchUserPosts();
   };
 
-  // Calculate stats data
+  
   const statsData = [
     { id: 1, title: "Total Projects", value: "1", icon: <FaFolder className="text-gray-500" /> },
     { id: 2, title: "Blog Posts", value: recentPosts.length.toString(), icon: <FaNewspaper className="text-gray-500" /> },

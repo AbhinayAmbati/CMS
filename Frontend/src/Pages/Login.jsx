@@ -19,14 +19,14 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Match backend endpoint from AuthController
+     
       const response = await axios.post(`${API_URL}/api/auth/signin`, {
         email,
         password
       });
       const data = response.data;
       
-      // Login with the correct structure from the API response
+     
       login(data.jwtToken, data.user);
       navigate('/dashboard');
     } catch (error) {
@@ -50,7 +50,7 @@ const Login = () => {
     }
   };
 
-  // Show password reset form
+  
   if (forgotPasswordMode) {
     return (
       <div className="min-h-[calc(100vh-100px)] overflow-hidden bg-gray-50 flex items-center justify-center px-4 py-12">
