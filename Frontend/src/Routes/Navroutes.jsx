@@ -4,14 +4,15 @@ import Home from '../Pages/Home'
 import Dashboard from '../Pages/Dashboard'
 import Login from '../Pages/Login'
 import Signup from '../Pages/Signup'
-import Blog from '../Pages/Blog'
-import BlogPost from '../Pages/BlogPost'
+import Content from '../Pages/Content'
+import ContentPost from '../Pages/ContentPost'
 import ProtectedRoute from '../components/ProtectedRoute'
 import AdminDashboard from '../Pages/Admin/AdminDashboard'
 import UserManagement from '../Pages/Admin/UserManagement'
-import ContentManagement from '../Pages/Admin/ContentManagement'
+import Analytics from '../Pages/Admin/Analytics'
+import Settings from '../Pages/Admin/Settings'
 import ResetPassword from '../Pages/ResetPassword'
-
+import ContentEditor from '../Components/ContentEditor'
 const Navroutes = () => {
   return (
     <Routes>
@@ -19,8 +20,10 @@ const Navroutes = () => {
         <Route path="/" element={<Home/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:id" element={<BlogPost />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/content" element={<Content />} />
+        <Route path="/content/:id" element={<ContentPost />} />
+        <Route path='/create-content' element={<ContentEditor />} />
         
         {/* Protected routes */}
         <Route path="/dashboard" element={
@@ -40,9 +43,14 @@ const Navroutes = () => {
             <UserManagement />
           </ProtectedRoute>
         } />
-        <Route path="/admin/content" element={
+        <Route path="/admin/analytics" element={
           <ProtectedRoute requireAdmin={true}>
-            <ContentManagement />
+            <Analytics />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/settings" element={
+          <ProtectedRoute requireAdmin={true}>
+            <Settings />
           </ProtectedRoute>
         } />
     </Routes>

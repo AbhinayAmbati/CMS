@@ -22,7 +22,7 @@ const Navbar = () => {
   const getNavLinks = () => {
     const links = [
       { id: 1, title: "Home", path: "/" },
-      { id: 2, title: "Blog", path: "/blog" },
+      { id: 2, title: "Content", path: "/content" },
     ];
 
     if (currentUser) {

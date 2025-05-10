@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import blogs from '../constants/blogs.json';
 
-const BlogPost = () => {
+const ContentPost = () => {
   const { id } = useParams();
   const blog = blogs.find(blog => blog.id === parseInt(id));
 
@@ -79,4 +79,4 @@ const BlogPost = () => {
   );
 };
 
-export default BlogPost; 
+export default ContentPost; 

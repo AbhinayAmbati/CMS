@@ -1,27 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaFolder, FaEye, FaNewspaper, FaCode, FaRegEdit, FaCommentAlt, FaUser, FaTimes, FaTrash } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import BlogEditor from '../Components/BlogEditor';
+import ContentEditor from '../Components/ContentEditor';
+import axios from 'axios';
 
 const Dashboard = () => {
   const [showBlogEditor, setShowBlogEditor] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [recentPosts, setRecentPosts] = useState([
-    { id: 1, title: "Getting Started with React", date: "Jan 15, 2025", views: "1.2k", comments: 8 },
-    { id: 2, title: "Advanced React Patterns", date: "Jan 10, 2025", views: "956", comments: 12 },
-  ]);
-  
-  const userData = {
-    name: "Vishnu",
-    title: "Full Stack Developer",
-    profileImage: "https://imgs.search.brave.com/Wy9yeON3-cT0jG1XYVChtQhRHqReCB8MUuscX8tdfx0/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89", 
-  };
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const API_URL = import.meta.env.VITE_API_URL;
+  const [userData, setUserData] = useState({
+    name: "User",
+    title: "Developer",
+    profileImage: "https://imgs.search.brave.com/Wy9yeON3-cT0jG1XYVChtQhRHqReCB8MUuscX8tdfx0/rs:fit:500:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTEz/MTE2NDU0OC92ZWN0/b3IvYXZhdGFyLTUu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PUNLNDlTaExKd0R4/RTRraXJvQ1I0Mmtp/bVR1dWh2dW8yRkg1/eV82YVNnRW89", 
+  });
 
-  const statsData = [
-    { id: 1, title: "Total Projects", value: "1", icon: <FaFolder className="text-gray-500" /> },
-    { id: 2, title: "Blog Posts", value: recentPosts.length.toString(), icon: <FaNewspaper className="text-gray-500" /> },
-    { id: 3, title: "Profile Views", value: "2.4k", icon: <FaEye className="text-gray-500" /> },
-  ];
+  // Fetch user posts on component mount
+  useEffect(() => {
+    fetchUserPosts();
+  }, []);
+
+  const fetchUserPosts = async () => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found. Please log in again.');
+        setIsLoading(false);
+        return;
+      }
+      
+      const response = await axios.get(
+        `${API_URL}/api/content/user`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      setRecentPosts(response.data || []);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError('Failed to load your posts. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreatePost = () => {
     setSelectedPost(null);
@@ -33,29 +60,48 @@ const Dashboard = () => {
     setShowBlogEditor(true);
   };
 
-  const handleDeletePost = (postId) => {
-    setRecentPosts(recentPosts.filter(post => post.id !== postId));
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found. Please log in again.');
+        return;
+      }
+      
+      await axios.delete(
+        `${API_URL}/api/content/delete/${postId}`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      // Update local state
+      setRecentPosts(recentPosts.filter(post => post.id !== postId));
+      
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      setError('Failed to delete post. Please try again.');
+    }
   };
 
-  const handleSavePost = (postData) => {
-    if (selectedPost) {
-      setRecentPosts(recentPosts.map(post => 
-        post.id === selectedPost.id 
-          ? { ...post, title: postData.title }
-          : post
-      ));
-    } else {
-      const newPost = {
-        id: Date.now(),
-        title: postData.title,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        views: "0",
-        comments: 0
-      };
-      setRecentPosts([newPost, ...recentPosts]);
-    }
+  const handleSavePost = async (postData) => {
+    // Content was saved in ContentEditor component
     setShowBlogEditor(false);
+    
+    // Refresh posts to get updated list
+    await fetchUserPosts();
   };
+
+  // Calculate stats data
+  const statsData = [
+    { id: 1, title: "Total Projects", value: "1", icon: <FaFolder className="text-gray-500" /> },
+    { id: 2, title: "Blog Posts", value: recentPosts.length.toString(), icon: <FaNewspaper className="text-gray-500" /> },
+    { id: 3, title: "Profile Views", value: "2.4k", icon: <FaEye className="text-gray-500" /> },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,7 +119,7 @@ const Dashboard = () => {
                 <FaTimes />
               </button>
             </div>
-            <BlogEditor 
+            <ContentEditor 
               initialData={selectedPost}
               onSave={handleSavePost}
             />
@@ -82,6 +128,12 @@ const Dashboard = () => {
       )}
 
       <div className="container mx-auto px-4 py-8">
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Profile Section */}
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -123,36 +175,44 @@ const Dashboard = () => {
                 </button>
               </div>
               
-              <div className="space-y-6">
-                {recentPosts.map((post) => (
-                  <div key={post.id} className="flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div>
-                      <Link to={`/blog/${post.id}`} className="text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
-                        {post.title}
-                      </Link>
-                      <p className="text-sm text-gray-500 mt-1">Published on {post.date}</p>
-                      <div className="flex space-x-4 mt-2 text-sm text-gray-500">
-                        <span className="flex items-center"><FaEye className="mr-1" /> {post.views} views</span>
-                        <span className="flex items-center"><FaCommentAlt className="mr-1" /> {post.comments} comments</span>
+              {isLoading ? (
+                <div className="py-8 text-center text-gray-500">Loading your posts...</div>
+              ) : recentPosts.length === 0 ? (
+                <div className="py-8 text-center text-gray-500">
+                  You haven't created any posts yet. Click "Create Post" to get started.
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {recentPosts.map((post) => (
+                    <div key={post.id} className="flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
+                      <div>
+                        <Link to={`/blog/${post.id}`} className="text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors">
+                          {post.title}
+                        </Link>
+                        <p className="text-sm text-gray-500 mt-1">Published on {post.date}</p>
+                        <div className="flex space-x-4 mt-2 text-sm text-gray-500">
+                          <span className="flex items-center"><FaEye className="mr-1" /> {post.views || 0} views</span>
+                          <span className="flex items-center"><FaCommentAlt className="mr-1" /> {post.comments || 0} comments</span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-3">
+                        <button 
+                          onClick={() => handleEditPost(post)}
+                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <FaRegEdit />
+                        </button>
+                        <button 
+                          onClick={() => handleDeletePost(post.id)}
+                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <FaTrash />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex space-x-3">
-                      <button 
-                        onClick={() => handleEditPost(post)}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <FaRegEdit />
-                      </button>
-                      <button 
-                        onClick={() => handleDeletePost(post.id)}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
