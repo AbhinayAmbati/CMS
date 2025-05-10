@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaEye, FaPlus } from 'react-icons/fa';
 import axios from 'axios';
+import AdminLayout from '../../Components/AdminLayout';
 
 const ContentManagement = () => {
   const [posts, setPosts] = useState([]);
@@ -82,7 +83,7 @@ const ContentManagement = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <AdminLayout>
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -93,12 +94,12 @@ const ContentManagement = () => {
             </div>
           </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <AdminLayout>
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Content Management</h1>
@@ -282,7 +283,7 @@ const ContentManagement = () => {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUsers, FaNewspaper, FaChartBar, FaCog, FaUserPlus, FaComments } from 'react-icons/fa';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import AdminLayout from '../../Components/AdminLayout';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -149,7 +150,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <AdminLayout>
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
@@ -243,7 +244,7 @@ const AdminDashboard = () => {
           ))}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
